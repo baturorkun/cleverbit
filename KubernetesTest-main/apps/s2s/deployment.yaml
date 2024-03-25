@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s2s-deployment
+  namespace: flux-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s2s
+  template:
+    metadata:
+      labels:
+        app: s2s
+    spec:
+      containers:
+      - name: s2s
+        image: baturorkun/s2s:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: enable-config
+          mountPath: /app/kpf/enable-config
+        - name: batur-secret
+          mountPath: /app/kpf/secret 
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          runAsNonRoot: true
+          runAsUser: 1000 
+          seccompProfile:
+            type: "RuntimeDefault"
+      volumes:
+      - name: enable-config
+        configMap:
+          name: cleverbit-configmap
+      - name: batur-secret
+        secret:
+          secretName: cleverbit-url-secret

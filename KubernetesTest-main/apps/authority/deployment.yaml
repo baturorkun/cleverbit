@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authority-deployment
+  namespace: flux-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authority
+  template:
+    metadata:
+      labels:
+        app: authority
+    spec:
+      containers:
+      - name: authority
+        image: baturorkun/authority:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: enable-config
+          mountPath: /app/kpf/enable-config
+        
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          runAsNonRoot: true
+          runAsUser: 1001
+          seccompProfile:
+            type: "RuntimeDefault"
+      volumes:
+      - name: enable-config
+        configMap:
+          name: cleverbit-configmap
